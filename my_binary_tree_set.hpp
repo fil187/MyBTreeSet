@@ -22,7 +22,7 @@ struct Entry {
      * @param parent -> the parent of this Entry, parent is null only for root
      * @pre created entry is Red and has no child
      */
-    Entry(const T& value, Entry<T>* parent): value(value), parent(parent), left(nullptr), right(nullptr), color(Red) {}
+    Entry(const T& value, Entry<T>* parent): value(value), color(Red), parent(parent), left(nullptr), right(nullptr) {}
 };
 
 template <std::totally_ordered T>
