@@ -62,13 +62,13 @@ public:
      * @note Copying is disabled because the container owns dynamically 
      *       allocated storage and does not implement deep-copy semantics.
      */
-    MyBTreeSet(const MyBTreeSet&) = delete;
+    MyBTreeSet(const MyBTreeSet<T>&) = delete;
 
     /**
      * @note Copying is disabled because the container owns dynamically 
      *       allocated storage and does not implement deep-copy semantics.
      */
-    MyBTreeSet& operator=(const MyBTreeSet&) = delete;
+    MyBTreeSet<T>& operator=(const MyBTreeSet<T>&) = delete;
 
     /**
      * Constructs a set containing copies of the elements in `source`.
@@ -77,7 +77,7 @@ public:
      * @post All allocated memory owned by `source` are now owned by this set.
      * @post `source` no longer ownes the allocated memory.
      */
-    MyBTreeSet(MyBTreeSet&& source) noexcept : root(source.root), size(source.size) {
+    MyBTreeSet(MyBTreeSet<T>&& source) noexcept : root(source.root), size(source.size) {
         source.root = nullptr;
         source.size = 0;
     }
@@ -89,7 +89,7 @@ public:
      * @post All allocated memory owned by `source` are now owned by this list.
      * @post `source` no longer ownes the allocated memory.
      */
-    MyBTreeSet& operator=(MyBTreeSet&& source) noexcept {
+    MyBTreeSet<T>& operator=(MyBTreeSet<T>&& source) noexcept {
         delete_entry(root);
         root = source.root;
         size = source.size;
