@@ -8,6 +8,33 @@ void testConstructor() {
     std::cout << "constructor test passed\n";
 }
 
+void testMoveConstructor() {
+    MyBTreeSet<int> set1;
+    for (int i = 1; i <= 100; i++)
+        set1.insert(i);
+    assert(set1.length() == 100);
+    MyBTreeSet<int> set2(std::move(set1));
+    assert(set1.length() == 0);
+    assert(set2.length() == 100);
+    for (int i = 1; i <= 100; i++)
+        assert(set2.contains(i));
+    std::cout << "move constructor test pased!\n";
+}
+
+void testMoveAssignmentOperator() {
+    MyBTreeSet<int> set1;
+    for (int i = 1; i <= 100; i++)
+        set1.insert(i);
+    assert(set1.length() == 100);
+    MyBTreeSet<int> set2;
+    set2 = std::move(set1);
+    assert(set1.length() == 0);
+    assert(set2.length() == 100);
+    for (int i = 1; i <= 100; i++)
+        assert(set2.contains(i));
+    std::cout << "move assignment operator test pased!\n";
+}
+
 void testBasicInsert() {
     MyBTreeSet<int> set;
     assert(set.insert(1));
@@ -73,6 +100,8 @@ void testInsertDeleteObject() {
 int main() {
     testConstructor();
     testBasicInsert();
+    testMoveConstructor();
+    testMoveAssignmentOperator();
     testBasicContains();
     testBasicRemove();
     testInsert();
