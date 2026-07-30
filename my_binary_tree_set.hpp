@@ -4,13 +4,18 @@
 
 enum Color { Black, Red };
 
+/**
+ * @brief An entry in a set.
+ * 
+ * @tparam T Must be totally ordered.
+ * 
+ * @invariant If `parent` then `parent->left == this` or `parent->right == this`. 
+ * @invariant If `left` then `left->parent == this`.
+ * @invariant If `right` then `right->parent == this`.
+ */
 template <std::totally_ordered T>
 struct Entry {
 
-    /**
-     * @invariant an entry forms a bidirectional 1 to 1 relationship with another entry (parent <-> child)
-     *            the parent must have this entry as either it's left or right child
-     */
     T value;
     Color color;
     Entry<T>* parent;
@@ -18,43 +23,98 @@ struct Entry {
     Entry<T>* right;
 
     /** 
-     * @param value -> value to be stored by the Entry
-     * @param parent -> the parent of this Entry, parent is null only for root
-     * @pre created entry is Red and has no child
+     * @brief Constructs an entry.
+     * 
+     * @post `color == red`
+     * @post The created entry has no children.
      */
     Entry(const T& value, Entry<T>* parent): value(value), color(Red), parent(parent), left(nullptr), right(nullptr) {}
 };
 
+/**
+ * @brief A mutable red-black binary tree set.
+ * 
+ * @invariant `root` is black.
+ * @invariant `root == nullptr` iff `size == 0`.
+ * @invariant `size` equals the number of nodes reachable from root.
+ * @invariant A red node does not have a red child.
+ * @invariant Every path from the root to each leaf has the same amount of black nodes.
+ * @invariant All leaves are Black.
+ * @invariant `entry->parent == nullptr` iff entry is the root.
+ * @invariant Each value is contained in the set at most once.
+ */
 template <std::totally_ordered T>
 class MyBTreeSet {
 
 private:
     
-    /**
-     * @invariant the root is always black
-     * @invariant a Red node does not have a Red child
-     * @invariant every path from the root to each leaf has the same ammount of Black nodes
-     * @invariant all leaves are Black
-     * @invariant entry->parent == nullptr then entry is the root
-     */
     Entry<T>* root;
     size_t size;
 
 public:
     
     /**
-     * default constructor
-     * @post root is null and the size is 0
+     * @brief Constructs an empty set.
      */
     MyBTreeSet(): root(nullptr), size(0) {}
 
+    /**
+     * @note Copying is disabled because the container owns dynamically 
+     *       allocated storage and does not implement deep-copy semantics.
+     */
+    MyBTreeSet(const MyBTreeSet&) = delete;
+
+    /**
+     * @note Copying is disabled because the container owns dynamically 
+     *       allocated storage and does not implement deep-copy semantics.
+     */
+    MyBTreeSet& operator=(const MyBTreeSet&) = delete;
+
+    /**
+     * Constructs a set containing copies of the elements in `source`.
+     * @brief Move Constructor.
+     * 
+     * @post All allocated memory owned by `source` are now owned by this set.
+     * @post `source` no longer ownes the allocated memory.
+     */
+    MyBTreeSet(MyBTreeSet&& source) noexcept : root(source.root), size(source.size) {
+        source.root = nullptr;
+        source.size = 0;
+    }
+
+    /**
+     * Replaces the contents of this set with those of `source`.
+     * @brief Move Assignment Operator.
+     * 
+     * @post All allocated memory owned by `source` are now owned by this list.
+     * @post `source` no longer ownes the allocated memory.
+     */
+    MyBTreeSet& operator=(MyBTreeSet&& source) noexcept {
+        delete_entry(root);
+        root = source.root;
+        size = source.size;
+        source.root = nullptr;
+        source.size = 0;
+        return *this;
+    }
+
+    /**
+     * @return The number of elements currently stored in the set.
+     */
     size_t length() const {
         return size;
     }
 
     /**
-     * @returns True if the value was succesfully inserted in the set,
-     * @returns False if the value was not succesfully inserted (was already present in the set)
+     * @par Complexity
+     *      O(log n)
+     * 
+     * @return true if the value was successfully inserted in the set, otherwise false.
+     * @throw std::bad_alloc if the allocation fails.
+     * 
+     * @post The size of this set is increased by 1 iff the function returns true.
+     * @post The value is present in the set.
+     * @post All values initially present in the set are still present.
      */
     bool insert(const T& value) {
         
@@ -84,6 +144,12 @@ public:
         return true;
     }
 
+    /**
+     * @par Complexity
+     *      O(log n)
+     * 
+     * @return true if the value is present in the set, otherwise false.
+     */
     bool contains(const T& value) const {
         if (size == 0)
             return false;
@@ -92,8 +158,14 @@ public:
     }
 
     /**
-     * @returns True if the value was removed from the tree,
-     * @returns False if the value was not removed from the tree (value was not present)
+     * @par Complexity
+     *      O(log n)
+     * 
+     * @return true if the value was successfully removed, otherwise false.
+     * 
+     * @post The size of this set is decreased by 1 iff the function returns true.
+     * @post `value` is not in the set.
+     * @post All values different from `value` initially present in the set are still present.
      */
     bool remove(const T& value) {
 
@@ -193,8 +265,8 @@ public:
     }
 
     /**
-     * calls delet_entry -> deletes all child node and current node
-     * @post all entrys are deleted
+     * @par Complexity
+     *      O(n)
      */
     ~MyBTreeSet() {
         delete_entry(root);
@@ -203,11 +275,14 @@ public:
 private:
 
     /** 
-     * @param value -> the value to search for in the tree
-     * @pre it is guaranteed that the tree is not empty
-     * @post returned Entry is not NULL
-     * @returns Entry corresponding with value if it exist
-     * @returns last not null entry if value is not present in the tree
+     * @par Complexity
+     *      O(log n)
+     * 
+     * @return The entry with value `value` if it exists,
+     *         the last non-null entry otherwise.
+     * 
+     * @pre The tree is not empty.
+     * @post The returned entry is not null.
      */
     Entry<T>* find_entry(const T& value) const {
         
@@ -224,9 +299,12 @@ private:
     }
 
     /**
-     * @param entry -> the node added to the tree
-     * @pre size of the tree is greater than 1
-     * @post tree respects the red black tree rules
+     * @par Complexity
+     *      O(log(n))
+     * 
+     * @param entry The node added to the tree.
+     * 
+     * @pre `size > 1`
      */
     void fix_insert(Entry<T>* entry) {
         
@@ -270,14 +348,17 @@ private:
     }
 
     /**
-     * @param replacement -> the node that replaces the physically removed node in the tree,
-     *                       is null if deleted node is a leaf
-     * @param parent -> the parent of the replacement node,
-     *                  is null if deleted node was root
-     * @param left_child -> true if the physically removed node was left child otherwise false
-     * @pre size > 1
-     * @pre the removed entry was Black
-     * @post tree respects the red black tree rules
+     * @par Complexity
+     *      O(log(n))
+     * 
+     * @param replacement The node that replaces the physically removed node in the tree,
+     *                    `replacement == nullptr` iff the deleted node is a leaf.
+     * @param parent The parent of the replacement node,
+     *               `parent == nullptr` iff the deleted node was the root.
+     * @param left_child true if the physically removed node was the left child, false otherwise.
+     * 
+     * @pre `size > 1`
+     * @pre The removed entry was black.
      */
     void fix_remove(Entry<T>* replacement, Entry<T>* parent, bool left_child) {
 
@@ -377,11 +458,12 @@ private:
     }
 
     /**
-     * @param node -> root of the subtree to rotate
-     * @pre node and node.right are not null
-     * @post node is the left child of entry, 
-     *       entry is the child of the grandparent, 
-     *       if node was the root then this.root = entry
+     * @param node The root of the subtree to rotate.
+     * 
+     * @pre `node != nullptr` and `node->right != nullptr`.
+     * @post `entry->left == node`
+     * @post `entry` is the child of the grandparent.
+     * @post `this.root == entry` iff `node` was the root.
      */
     void rotate_left(Entry<T>* node) {
 
@@ -404,11 +486,12 @@ private:
     }
 
     /**
-     * @param node -> root of the subtree to rotate
-     * @pre node and node.left are not null
-     * @post node is the right child of entry, 
-     *       entry is the child of the grandparent, 
-     *       if node was the root then this.root = entry
+     * @param node The root of the subtree to rotate.
+     * 
+     * @pre `node != nullptr` and `node->left != nullptr`.
+     * @post `entry->right == node` 
+     * @post `entry` is the child of the grandparent.
+     * @post `this.root == entry` iff `node` was the root.
      */
     void rotate_right(Entry<T>* node) {
 
@@ -431,8 +514,8 @@ private:
     }
 
     /**
-     * @param entry -> the root of the sub-tree to be deleted
-     * @post deletes all node from the sub-tree with root entry
+     * @param entry The root of the subtree to be deleted.
+     * @post All nodes from the subtree with root `entry` are deleted.
      */
     void delete_entry(Entry<T>* entry) {
         
@@ -444,4 +527,5 @@ private:
             delete entry;
         }
     }
+
 };
