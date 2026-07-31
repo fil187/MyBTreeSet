@@ -5,6 +5,11 @@ A Red-Black tree set implementation in C++.
 
 This project was created as part of a learning exercise to better understand data structures and algorithms, specifically balanced binary search trees.
 
+## Documentation
+
+API documentation:
+https://fil187.github.io/MyBTreeSet/
+
 ## Features
 
 - Red Black Binary Tree set implementation
