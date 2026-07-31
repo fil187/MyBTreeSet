@@ -86,7 +86,7 @@ public:
      * Replaces the contents of this set with those of `source`.
      * @brief Move Assignment Operator.
      * 
-     * @post All allocated memory owned by `source` are now owned by this list.
+     * @post All allocated memory owned by `source` are now owned by this set.
      * @post `source` no longer ownes the allocated memory.
      */
     MyBTreeSet<T>& operator=(MyBTreeSet<T>&& source) noexcept {
@@ -349,7 +349,7 @@ private:
 
     /**
      * @par Complexity
-     *      O(log(n))
+     *      O(log n)
      * 
      * @param replacement The node that replaces the physically removed node in the tree,
      *                    `replacement == nullptr` iff the deleted node is a leaf.
