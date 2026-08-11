@@ -102,6 +102,17 @@ TYPED_TEST(MyBTreeSetTest, MoveConstructor) {
         EXPECT_TRUE(s2.contains(this->get_arr_1()[i]));
 }
 
+TYPED_TEST(MyBTreeSetTest, MoveAssignment) {
+    MyBTreeSet<TypeParam> s1;
+    this->populate_set_1(s1);
+    MyBTreeSet<TypeParam> s2;
+    s2 = std::move(s1);
+    EXPECT_EQ(0, s1.length());
+    EXPECT_EQ(this->get_len_1(), s2.length());
+    for (size_t i = 0; i < this->get_len_1(); i++)
+        EXPECT_TRUE(s2.contains(this->get_arr_1()[i]));
+}
+
 TYPED_TEST(MyBTreeSetTest, BasicInsertion) {
     MyBTreeSet<TypeParam> s;
     TypeParam* array = this->get_arr_1();
