@@ -1,11 +1,13 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall -Wextra
+CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -g -lgtest -lgtest_main
+GTESTFLAGS = --gtest_output=xml:test-results.xml
+
 
 tests: tests.cpp
-	$(CXX) $(CXXFLAGS) ./tests.cpp -o tests.exe
+	$(CXX) ./tests.cpp $(CXXFLAGS) -o tests.exe
 
 run: tests
-	./tests.exe
+	./tests.exe $(GTESTFLAGS)
 
 clean:
-	rm tests.exe
+	rm tests.exe && rm test-results.xml

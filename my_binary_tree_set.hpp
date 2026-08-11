@@ -34,6 +34,8 @@ struct Entry {
 /**
  * @brief A mutable red-black binary tree set.
  * 
+ * @tparam T Must be totally ordered.
+ * 
  * @invariant `root` is black.
  * @invariant `root == nullptr` iff `size == 0`.
  * @invariant `size` equals the number of nodes reachable from root.
@@ -290,7 +292,7 @@ private:
         while (node->value != value)
             if (node->value > value && node->left != nullptr)
                 node = node->left;
-            else if (node->right != nullptr)
+            else if (node->value < value && node->right != nullptr)
                 node = node->right;
             else
                 break;

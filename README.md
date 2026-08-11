@@ -16,13 +16,18 @@ https://fil187.github.io/MyBTreeSet/
 - Element insertion
 - Element removal
 - Element lookup
-- Invariant preservation
 
-## Building
+## Testing
 
-Requierment:
+The test suite (`tests.cpp`) uses the GoogleTest framework.
+
+### Requirements
+
 - C++ compiler with C++20 support
+- GoogleTest (gtest)
 - GNU Make
+
+### Building 
 
 Build the tests:
 ```bash
